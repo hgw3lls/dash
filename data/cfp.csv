@@ -1,2 +1,11 @@
 id,title,organization,deadline,tags,description,url
-cfp-1,Residency Open Call,Art Org,2026-04-20,art;residency,Great residency opportunity,https://example.com/cfp1
+cfp-001,Art and Design in the Age of AI,Edited Scholarly Collection,2026-09-11,"A,B,GM","Critical and cultural analysis of AI in art, design, and media. Strong dissertation extraction candidate.",""
+cfp-002,The Sleep of Digital Reason? Dreaming of a Creative Machine in the Age of AI,Caleidoscopio (Special Issue),2026-03-15,"A,B,GM","Media theory, philosophy of technology, and artistic practice approaches to AI.","https://call-for-papers.sas.upenn.edu/cfp/2025/11/27/cfp-vol-1-no-2-the-sleep-of-digital-reason-dreaming-of-a-creative-machine-in-the-age"
+cfp-003,AIMEDIA 2026 – Artificial Intelligence, Media & Digital Technology,International Conference,2026-03-14,"B,GM","AI and media infrastructure, creativity, communication systems, and critical perspectives.",""
+cfp-004,Philosophical Dimensions of Artificial Intelligence (Issue 19),Dia-noesis (Special Issue),2026-04-15,"B,GM","Philosophical analysis of AI, abstraction, ontology, and computational epistemology.",""
+cfp-005,The Philosophy of Generative AI: Perspectives from East and West,Synthese (Special Issue),2026-06-01,"B,GM","Comparative philosophical approaches to generative AI and model-based reasoning.",""
+cfp-006,AI and Artworks,Conference (Vienna),,"A","Artistic AI focus; examining datasets, creative systems, and limits of AI art.",""
+cfp-007,Digital Culture & Education – AI Special Issue,Journal Special Issue,,"A,B","Arts-based and speculative inquiry into AI within cultural and educational contexts.",""
+cfp-008,Imaginations – Special Issue (AI / Media / Humanities),Journal Special Issue,,"A,B,GM","Research-creation and critical AI perspectives across media and visual culture.",""
+cfp-009,European Journal of Communication Research – AI Special Issue,Journal Special Issue,,"B,GM","AI-mediated communication and transformation of public culture.",""
+cfp-010,Expanded Animation CFP,Conference / Edited Volume,,"A","Theoretical and critical perspectives on animation, media, and AI.",""
