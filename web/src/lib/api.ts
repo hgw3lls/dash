@@ -24,7 +24,13 @@ function resolveApiUrl(): string {
 const API_URL = resolveApiUrl().replace(/\/$/, '')
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init)
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, init)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    throw new Error(`Unable to reach API at ${API_URL}. ${detail}`)
+  }
   if (!response.ok) {
     const message = await response.text()
     throw new Error(message || `Request failed: ${response.status}`)
