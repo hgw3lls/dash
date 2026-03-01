@@ -1,0 +1,40 @@
+[project]
+name = "trackers-dashboard-api"
+version = "0.1.0"
+description = "FastAPI backend for trackers-dashboard"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "sqlalchemy>=2.0.30",
+  "alembic>=1.13.2",
+  "pydantic-settings>=2.3.4",
+  "python-multipart>=0.0.9"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "httpx>=0.27.0",
+  "ruff>=0.6.2",
+  "black>=24.8.0"
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["app"]
+testpaths = ["tests"]
