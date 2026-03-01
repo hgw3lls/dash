@@ -10,7 +10,7 @@ function resolveApiUrl(): string {
   const configured = import.meta.env.VITE_API_URL?.trim()
 
   if (!configured) {
-    return 'http://localhost:8000'
+    return `${window.location.protocol}//${window.location.hostname}:8000`
   }
 
   // Support shorthand values such as ":8000" by targeting the current host.
@@ -24,7 +24,13 @@ function resolveApiUrl(): string {
 const API_URL = resolveApiUrl().replace(/\/$/, '')
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init)
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, init)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    throw new Error(`Unable to reach API at ${API_URL}. Ensure the backend is running and accessible. (${detail})`)
+  }
   if (!response.ok) {
     const message = await response.text()
     throw new Error(message || `Request failed: ${response.status}`)

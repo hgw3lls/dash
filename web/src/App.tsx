@@ -37,6 +37,11 @@ function urgencyLabel(deadline: string | null): string {
   return 'Later'
 }
 
+function formatError(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
 function parseTagInput(value: string): string[] {
   return value
     .split(',')
@@ -115,11 +120,11 @@ export default function App() {
   }
 
   useEffect(() => {
-    refreshData().catch((error) => setToast(`Error loading opportunities: ${String(error)}`))
+    refreshData().catch((error) => setToast(`Error loading opportunities: ${formatError(error)}`))
   }, [params])
 
   useEffect(() => {
-    refreshViews().catch((error) => setToast(`Error loading saved views: ${String(error)}`))
+    refreshViews().catch((error) => setToast(`Error loading saved views: ${formatError(error)}`))
   }, [])
 
   useEffect(() => {
@@ -138,7 +143,7 @@ export default function App() {
           region_tag: item.region_tag ?? '',
         })
       })
-      .catch((error) => setToast(`Error loading opportunity: ${String(error)}`))
+      .catch((error) => setToast(`Error loading opportunity: ${formatError(error)}`))
   }, [selectedId])
 
   function toggleArrayFilter(key: 'types' | 'statuses', value: string) {
