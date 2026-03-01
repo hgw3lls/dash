@@ -166,6 +166,20 @@ This deletes the SQLite DB file (if it exists) and reruns Alembic migrations.
 - **CORS error in browser**: ensure API runs on `http://localhost:8000` and web on `http://localhost:5173`, or set `VITE_API_URL` to match.
 - **Port conflict**: change `API_PORT`/`WEB_PORT` in `.env`, then restart services.
 - **No data in UI**: verify CSV files are in `data/` and run `make ingest`.
+- **If you see `no such table: ingest_runs`**: run `make migrate` to apply the latest Alembic schema, then rerun `make ingest`. If needed, activate backend venv and run `cd api && alembic upgrade head` directly.
+
+  Quick debug checklist (from repo root unless noted):
+
+  ```bash
+  # Check current tables (run from api/)
+  cd api && sqlite3 ../db/app.db ".tables"
+
+  # Run migrations
+  cd api && alembic upgrade head
+
+  # Reset + migrate + ingest
+  rm -f db/app.db && cd api && alembic upgrade head && python ../scripts/ingest.py --folder ../data
+  ```
 - **Missing frontend types/build errors**: run `cd web && npm install` before `npm run build`.
 
 ## Make targets
@@ -174,6 +188,7 @@ This deletes the SQLite DB file (if it exists) and reruns Alembic migrations.
 - `make api`
 - `make web`
 - `make ingest`
+- `make migrate`
 - `make test`
 - `make reset`
 - `make api-install`

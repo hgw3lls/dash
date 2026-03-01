@@ -7,7 +7,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.models import IngestRun, Opportunity, Tag
@@ -56,8 +57,10 @@ class IngestOptions:
     mapping_overrides: dict[str, dict[str, str]] | None = None
 
 
-def _normalize_key(value: str) -> str:
-    return value.strip().lower().replace(" ", "_")
+def _normalize_key(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).strip().lower().replace(" ", "_")
 
 
 def _normalize_str(value: str | None) -> str:
@@ -108,7 +111,11 @@ def _find_value(
     canonical_field: str,
     file_overrides: dict[str, str] | None,
 ) -> str | None:
-    normalized = {_normalize_key(k): (v.strip() if isinstance(v, str) else v) for k, v in row.items()}
+    normalized = {
+        normalized_key: (v.strip() if isinstance(v, str) else v)
+        for k, v in row.items()
+        if (normalized_key := _normalize_key(k))
+    }
 
     if file_overrides and canonical_field in file_overrides:
         override_key = _normalize_key(file_overrides[canonical_field])
@@ -227,6 +234,19 @@ def upsert_opportunity(db: Session, normalized: dict[str, Any], overwrite_user_f
     return True
 
 
+
+
+def _ensure_required_tables(db: Session) -> None:
+    required_tables = {"opportunities", "tags", "opportunity_tags", "saved_views", "ingest_runs"}
+    available_tables = set(inspect(db.bind).get_table_names())
+    missing_tables = sorted(required_tables - available_tables)
+    if missing_tables:
+        missing = ", ".join(missing_tables)
+        raise RuntimeError(
+            "Database schema is missing required tables: "
+            f"{missing}. Run `make migrate` (or `cd api && alembic upgrade head`) and retry ingest."
+        )
+
 def ingest_folder(db: Session, options: IngestOptions) -> IngestSummary:
     summary = IngestSummary()
     folder = Path(options.folder)
@@ -234,6 +254,8 @@ def ingest_folder(db: Session, options: IngestOptions) -> IngestSummary:
     if not folder.exists():
         logger.warning("Ingest folder does not exist: %s", folder)
         return summary
+
+    _ensure_required_tables(db)
 
     files = sorted(folder.glob(options.pattern))
     summary.files_processed = len(files)
@@ -259,5 +281,13 @@ def ingest_folder(db: Session, options: IngestOptions) -> IngestSummary:
         errors=summary.errors,
     )
     db.add(ingest_run)
-    db.commit()
+    try:
+        db.commit()
+    except OperationalError as exc:
+        if "no such table: ingest_runs" in str(exc).lower():
+            logger.error(
+                "Missing database table `ingest_runs`. Apply migrations with `make migrate` "
+                "(or `cd api && alembic upgrade head`) before running ingest."
+            )
+        raise
     return summary
