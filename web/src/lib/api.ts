@@ -29,7 +29,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     response = await fetch(`${API_URL}${path}`, init)
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error)
-    throw new Error(`Unable to reach API at ${API_URL}. Ensure the backend is running and accessible. (${detail})`)
+    throw new Error(`Unable to reach API at ${API_URL}. ${detail}`)
   }
   if (!response.ok) {
     const message = await response.text()
