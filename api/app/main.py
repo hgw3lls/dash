@@ -2,12 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.db.session import Base, engine
 from app.routers.health import router as health_router
 from app.routers.ingest import router as ingest_router
 from app.routers.opportunities import router as opportunities_router
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="trackers-dashboard-api")
 app.add_middleware(
