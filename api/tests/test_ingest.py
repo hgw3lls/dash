@@ -1,7 +1,10 @@
 from datetime import date
 from pathlib import Path
 
-from app.ingest import IngestOptions, generate_opportunity_id, ingest_folder, parse_date
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.ingest import IngestOptions, _normalize_key, generate_opportunity_id, ingest_folder, parse_date
 from app.models import Opportunity
 
 
@@ -40,3 +43,27 @@ def test_upsert_preserves_status_and_notes(db_session, tmp_path: Path) -> None:
     assert persisted is not None
     assert persisted.status == "applied"
     assert persisted.notes == "user note"
+
+
+def test_ingest_fails_fast_when_required_tables_missing(tmp_path: Path) -> None:
+    db_path = tmp_path / "partial.db"
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    with engine.begin() as conn:
+        conn.exec_driver_sql("CREATE TABLE ingest_runs (id INTEGER PRIMARY KEY, ran_at TEXT, source_path TEXT, rows_in INTEGER, rows_upserted INTEGER, errors INTEGER)")
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    fixture = Path(__file__).parent / "fixtures" / "mixed_tracker.csv"
+    csv_copy = tmp_path / "mixed_tracker.csv"
+    csv_copy.write_text(fixture.read_text(encoding="utf-8"), encoding="utf-8")
+
+    with SessionLocal() as session:
+        try:
+            ingest_folder(session, IngestOptions(folder=str(tmp_path)))
+            raise AssertionError("expected ingest to fail when schema tables are missing")
+        except RuntimeError as exc:
+            assert "missing required tables" in str(exc).lower()
+            assert "tags" in str(exc)
+
+
+def test_normalize_key_handles_none() -> None:
+    assert _normalize_key(None) == ""

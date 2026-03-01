@@ -1,4 +1,4 @@
-.PHONY: dev api web ingest test api-install db-init reset web-install
+.PHONY: dev api web ingest test api-install db-init reset web-install migrate
 
 api-install:
 	cd api && python3.12 -m venv .venv && . .venv/bin/activate && pip install -e .[dev]
@@ -7,6 +7,9 @@ web-install:
 	cd web && npm install
 
 db-init:
+	$(MAKE) migrate
+
+migrate:
 	cd api && . .venv/bin/activate && alembic upgrade head
 
 api:
@@ -22,8 +25,8 @@ dev:
 	trap "kill $$api_pid $$web_pid" INT TERM EXIT; \
 	wait'
 
-ingest:
-	python3 scripts/ingest.py --folder data --pattern "*.csv"
+ingest: migrate
+	cd api && . .venv/bin/activate && python ../scripts/ingest.py --folder ../data --pattern "*.csv"
 
 test:
 	cd api && . .venv/bin/activate && pytest
