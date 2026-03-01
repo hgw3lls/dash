@@ -6,7 +6,22 @@ import type {
   SavedView,
 } from './types'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+function resolveApiUrl(): string {
+  const configured = import.meta.env.VITE_API_URL?.trim()
+
+  if (!configured) {
+    return 'http://localhost:8000'
+  }
+
+  // Support shorthand values such as ":8000" by targeting the current host.
+  if (configured.startsWith(':')) {
+    return `${window.location.protocol}//${window.location.hostname}${configured}`
+  }
+
+  return configured
+}
+
+const API_URL = resolveApiUrl().replace(/\/$/, '')
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, init)
