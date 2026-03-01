@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+web/dist/
+
+# Local-only runtime data
+/data/
+/db/
+/logs/
+
+# OS
+.DS_Store
