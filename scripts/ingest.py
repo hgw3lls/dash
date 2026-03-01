@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
+import subprocess
 import sys
 from pathlib import Path
 
@@ -9,6 +10,24 @@ sys.path.insert(0, str(ROOT / "api"))
 
 from app.db.session import SessionLocal
 from app.ingest import IngestOptions, ingest_folder
+
+
+logger = logging.getLogger(__name__)
+
+
+def ensure_schema_up_to_date() -> None:
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            cwd=ROOT / "api",
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        logger.error(
+            "Failed to migrate database schema before ingest. "
+            "Run `make migrate` (or `cd api && alembic upgrade head`) and retry."
+        )
+        raise SystemExit(exc.returncode) from exc
 
 
 def main() -> None:
@@ -24,6 +43,8 @@ def main() -> None:
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
+    ensure_schema_up_to_date()
 
     options = IngestOptions(
         folder=args.folder,

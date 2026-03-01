@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.models import IngestRun, Opportunity, Tag
@@ -259,5 +260,13 @@ def ingest_folder(db: Session, options: IngestOptions) -> IngestSummary:
         errors=summary.errors,
     )
     db.add(ingest_run)
-    db.commit()
+    try:
+        db.commit()
+    except OperationalError as exc:
+        if "no such table: ingest_runs" in str(exc).lower():
+            logger.error(
+                "Missing database table `ingest_runs`. Apply migrations with `make migrate` "
+                "(or `cd api && alembic upgrade head`) before running ingest."
+            )
+        raise
     return summary
