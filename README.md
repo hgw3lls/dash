@@ -32,7 +32,7 @@ Defaults:
 cd api
 python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e .[dev]
 ```
 
 ### 3) DB init
